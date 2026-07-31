@@ -9,6 +9,23 @@ This is a hobby/educational project, **not a medical device**. All
 melatonin/sleep-pressure visuals are explicitly illustrative estimates, not
 measured biological data.
 
+## Why I built this
+
+This started from noticing a pattern in my own life. I was chronically low
+on sleep, and at work I'd reach for caffeine in fits and starts, sometimes
+back-to-back cups with barely a gap, sometimes spaced hours apart depending
+on the day. After a while I started noticing my sleep quality wasn't
+consistent either; some nights were fine, some were rough, and it felt like
+it tracked *when* I'd had caffeine relative to bedtime more than *how much*
+I'd had overall.
+
+The problem was I couldn't actually see it. I had a vague sense of "that
+second coffee was probably too late" but no way to check it against
+anything real. I wanted something that would take a rough pharmacokinetic
+model of caffeine and just show me, visually, whether a given drink would
+realistically still be in my system by the time I wanted to sleep, instead
+of guessing after the fact.
+
 ## What it does
 
 - Log drinks (presets or an exact mg amount) with a timestamp.
