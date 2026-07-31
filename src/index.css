@@ -14,7 +14,7 @@
   --color-espresso-100: #f3e2c7;
   --color-espresso-50: #faf3e7;
 
-  /* Cool "night" palette for melatonin / sleep overlay */
+  /* Cool "night" palette for the sleep-pressure overlay */
   --color-night-950: #05060f;
   --color-night-900: #0b0e1f;
   --color-night-800: #131834;
@@ -47,4 +47,17 @@ body {
   color: var(--color-espresso-100);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Covers plain CSS transitions (buttons, hover states); framer-motion
+   animations are separately handled via <MotionConfig reducedMotion="user">. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
