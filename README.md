@@ -6,8 +6,8 @@ estimated to still be in your system, and whether it'll still be active
 around your bedtime.
 
 This is a hobby/educational project, **not a medical device**. All
-melatonin/sleep-pressure visuals are explicitly illustrative estimates, not
-measured biological data.
+sleep-pressure visuals and impact estimates are explicitly illustrative,
+not measured biological data or a personalized prediction.
 
 ## Why I built this
 
@@ -31,11 +31,14 @@ of guessing after the fact.
 - Log drinks (presets or an exact mg amount) with a timestamp.
 - See a single stacked curve of estimated blood caffeine concentration,
   built by summing the contribution of every drink you've logged.
-- See an illustrative "sleep pressure" band showing roughly when your body
-  is winding down for sleep, based on your stated bedtime and wake time.
-- Get a reactive "last safe [drink]" readout: the latest time you could have
-  a given drink so that, by your bedtime, its modeled concentration has
-  decayed to your chosen acceptable-residual threshold.
+- See an illustrative sleep-pressure band modeling the interaction of your
+  homeostatic sleep drive and circadian rhythm (the two-process model), based
+  on your stated bedtime and wake time.
+- Get a reactive "last safe [drink]" readout, plus a population-level
+  confidence range reflecting how much caffeine half-life genuinely varies
+  between people, not just your own dialed-in setting.
+- See a quantified estimate of tonight's sleep impact, in minutes, based on
+  published dose/timing trial coefficients.
 - Tune body weight, caffeine half-life (metabolizer speed), bedtime, wake
   time, and residual threshold in Settings.
 - Everything is stored locally in your browser (`localStorage`); there is
@@ -72,21 +75,53 @@ Drink presets that come from a range (rather than an exact mg entry) are
 rendered with a shaded uncertainty band between the low and high estimate,
 not a single hard line.
 
-### The safe-bedtime calculator
+### The safe-bedtime calculator, and its confidence range
 
 Given your bedtime and an "acceptable residual %" threshold (default 20% of
 a dose's own peak concentration), the app solves numerically for the latest
 intake time such that, by bedtime, the modeled concentration has decayed to
-at or below that threshold.
+at or below that threshold, using your currently dialed-in half-life.
 
-### The melatonin / sleep-pressure overlay: illustrative only
+Because real caffeine half-life varies enormously between people
+(roughly 1.5-9.5 hours, driven by CYP1A2 genetics, smoking status,
+pregnancy, and hormonal birth control), a single point estimate overstates
+how precisely anyone can know their own number. Alongside your personal
+setting, the app runs a small Monte Carlo simulation (deterministically
+seeded, so it doesn't flicker between renders) across that entire clinical
+half-life range and reports the 10th-90th percentile spread as a "typical
+range." Treat the point estimate as your best guess and the range as how
+wrong that guess could reasonably be.
+
+### The sleep-pressure overlay: a real two-process model, still illustrative
 
 The dashed band on the chart is **not measured or individually modeled
-biology**. It's a simple smooth bell curve that starts rising ~2 hours
-before your stated bedtime, peaks at the midpoint of your stated sleep
-window, and falls off approaching your stated wake time. It exists purely
-to give a visual sense of "is this caffeine still around when I'm trying to
-wind down"; treat it as a sketch, not a measurement.
+biology** (it isn't EEG or actigraphy data), but it now implements the
+mechanism, not just a hand-drawn shape. It's an implementation of the
+classic Borbély two-process model of sleep regulation:
+
+- **Process S**, the homeostatic sleep drive, rises while you're awake and
+  decays while you're asleep, each following an exponential approach to an
+  asymptote.
+- **Process C**, a circadian oscillator, modulates that drive on a 24-hour
+  cycle, with its trough anchored a couple of hours before your stated wake
+  time (approximating the core-body-temperature minimum commonly used as a
+  circadian phase reference).
+
+The two combined reproduce recognizable real-world shapes, like the
+early-afternoon dip, rather than a single symmetric bump. The illustrative
+time constants used are commonly cited approximations, not a fitted or
+personalized model; see [Sources](#sources) below.
+
+### The sleep-impact estimate
+
+Rather than only a threshold crossing, the app also surfaces a plain-language
+number: an estimate of how many minutes of total sleep tonight's caffeine
+intake might cost you. This is a coarse linear extrapolation from
+published dose/timing regression coefficients (roughly 0.2 minutes of sleep
+lost per mg of caffeine, offset by roughly 2.8 minutes recovered per hour of
+gap before bedtime), not a mechanistic or personalized model, floored at
+zero. It's meant as a directional, plain-English translation of the same
+trial data the safe-bedtime calculator is built on, not a separate claim.
 
 ## Running locally
 
@@ -99,8 +134,9 @@ Then open the printed local URL (typically `http://localhost:5173`).
 
 ### Tests
 
-Unit tests cover the PK math (concentration curve shape, Tmax window,
-dose stacking, the melatonin overlay's shape, and the safe-bedtime solver):
+Unit tests cover the PK math (concentration curve shape, Tmax window, and
+dose stacking), the two-process sleep-pressure model, the sleep-impact
+estimate, and the safe-bedtime solver (including its confidence range):
 
 ```bash
 npm run test
@@ -118,6 +154,33 @@ Outputs a static site to `dist/`.
 
 Vite, React 18, TypeScript, Tailwind CSS v4, Framer Motion, Recharts,
 Zustand, date-fns, Vitest.
+
+## Sources
+
+The pharmacokinetic model uses standard, widely cited one-compartment
+formulas and parameter ranges. The newer sleep-modeling features are built
+directly on these papers:
+
+- Borbély A. "The two-process model of sleep regulation: a reappraisal."
+  *J Sleep Res* (2016).
+  [onlinelibrary.wiley.com/doi/abs/10.1111/jsr.12371](https://onlinelibrary.wiley.com/doi/abs/10.1111/jsr.12371)
+- Borbély A, Daan S, Wirz-Justice A, Deboer T. "The two-process model of
+  sleep regulation: a reappraisal." *J Sleep Res* / PMC.
+  [ncbi.nlm.nih.gov/pmc/articles/PMC9540767](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9540767/)
+- Reichert C, et al. "Adenosine, caffeine, and sleep-wake regulation: state
+  of the science and perspectives." *J Sleep Res* (2022).
+  [onlinelibrary.wiley.com/doi/full/10.1111/jsr.13597](https://onlinelibrary.wiley.com/doi/full/10.1111/jsr.13597)
+- "Dose and timing effects of caffeine on subsequent sleep: a randomized
+  clinical crossover trial." *SLEEP* (2025), Oxford Academic. Source of the
+  sleep-impact-estimate coefficients.
+  [academic.oup.com/sleep/article/48/4/zsae230/7815486](https://academic.oup.com/sleep/article/48/4/zsae230/7815486)
+- "The effect of caffeine on subsequent sleep: A systematic review and
+  meta-analysis." *Sleep Medicine Reviews*.
+  [sciencedirect.com/science/article/pii/S1087079223000205](https://www.sciencedirect.com/science/article/pii/S1087079223000205)
+- "Role of adenosine receptors in caffeine tolerance." *PubMed*.
+  [pubmed.ncbi.nlm.nih.gov/1846425](https://pubmed.ncbi.nlm.nih.gov/1846425/)
+- "Caffeine Withdrawal." StatPearls, NIH.
+  [ncbi.nlm.nih.gov/books/NBK430790](https://www.ncbi.nlm.nih.gov/books/NBK430790/)
 
 ## Disclaimer
 
