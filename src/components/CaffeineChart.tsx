@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { motion } from 'framer-motion'
+import { useMemo } from 'react'
 import {
   Area,
   CartesianGrid,
@@ -48,18 +49,21 @@ function ChartTooltip({
         )}
       </p>
       <p className="text-night-300">
-        Sleep pressure: {(point.melatoninLevel * 100).toFixed(0)}%
+        Sleep pressure: {(point.sleepPressureLevel * 100).toFixed(0)}%
       </p>
     </div>
   )
 }
 
 export function CaffeineChart({ data, nowMs }: CaffeineChartProps) {
-  const chartData = data.map((point) => ({
-    ...point,
-    bandWidth: Math.max(0, point.highMg - point.lowMg),
-    melatoninDisplay: point.melatoninLevel * maxMg(data),
-  }))
+  const chartData = useMemo(() => {
+    const peak = maxMg(data)
+    return data.map((point) => ({
+      ...point,
+      bandWidth: Math.max(0, point.highMg - point.lowMg),
+      sleepPressureDisplay: point.sleepPressureLevel * peak,
+    }))
+  }, [data])
 
   return (
     <motion.div
@@ -120,7 +124,7 @@ export function CaffeineChart({ data, nowMs }: CaffeineChartProps) {
           />
           <Area
             yAxisId="caffeine"
-            dataKey="melatoninDisplay"
+            dataKey="sleepPressureDisplay"
             stroke="var(--color-night-300)"
             strokeDasharray="5 3"
             fill="var(--color-night-700)"

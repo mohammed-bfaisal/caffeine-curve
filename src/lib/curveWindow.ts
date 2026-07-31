@@ -1,6 +1,6 @@
 import type { Dose } from './doseStack'
 import { totalConcentrationAt } from './doseStack'
-import { buildMelatoninCurve } from './melatoninOverlay'
+import { buildSleepPressureCurve } from './sleepPressureModel'
 import type { PkProfile } from './pkModel'
 
 export interface CurvePoint {
@@ -8,7 +8,7 @@ export interface CurvePoint {
   mg: number
   lowMg: number
   highMg: number
-  melatoninLevel: number
+  sleepPressureLevel: number
 }
 
 export const DEFAULT_LOOKBACK_HOURS = 24
@@ -17,9 +17,9 @@ export const DEFAULT_STEP_MINUTES = 10
 
 /**
  * Builds the combined "today's curve" dataset: caffeine concentration
- * (with uncertainty band) and the illustrative melatonin overlay, sampled
- * on a shared timeline from `lookbackHours` in the past to `lookaheadHours`
- * in the future.
+ * (with uncertainty band) and the illustrative two-process sleep-pressure
+ * overlay, sampled on a shared timeline from `lookbackHours` in the past to
+ * `lookaheadHours` in the future.
  */
 export function buildCurveWindow(
   doses: Dose[],
@@ -34,25 +34,25 @@ export function buildCurveWindow(
   const startMs = nowMs - lookbackHours * 3_600_000
   const endMs = nowMs + lookaheadHours * 3_600_000
 
-  const melatonin = buildMelatoninCurve(startMs, endMs, stepMinutes, bedtimeHour, wakeHour)
+  const sleepPressure = buildSleepPressureCurve(startMs, endMs, stepMinutes, bedtimeHour, wakeHour)
 
   const points: CurvePoint[] = []
   const stepMs = stepMinutes * 60_000
-  let melatoninIndex = 0
+  let sleepPressureIndex = 0
   for (let t = startMs; t <= endMs; t += stepMs) {
     const { mg, lowMg, highMg } = totalConcentrationAt(doses, t, profile)
     while (
-      melatoninIndex < melatonin.length - 1 &&
-      melatonin[melatoninIndex].timestampMs < t
+      sleepPressureIndex < sleepPressure.length - 1 &&
+      sleepPressure[sleepPressureIndex].timestampMs < t
     ) {
-      melatoninIndex++
+      sleepPressureIndex++
     }
     points.push({
       timestampMs: t,
       mg,
       lowMg,
       highMg,
-      melatoninLevel: melatonin[melatoninIndex]?.level ?? 0,
+      sleepPressureLevel: sleepPressure[sleepPressureIndex]?.level ?? 0,
     })
   }
   return points

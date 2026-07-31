@@ -32,12 +32,12 @@ describe('buildCurveWindow', () => {
     expect(atNow?.mg).toBeGreaterThan(0)
   })
 
-  it('includes a melatonin level for every sample point', () => {
+  it('includes a sleep-pressure level for every sample point', () => {
     const now = Date.now()
     const points = buildCurveWindow([], PROFILE, 23, 7, now, 24, 12, 60)
     for (const point of points) {
-      expect(point.melatoninLevel).toBeGreaterThanOrEqual(0)
-      expect(point.melatoninLevel).toBeLessThanOrEqual(1)
+      expect(point.sleepPressureLevel).toBeGreaterThanOrEqual(0)
+      expect(point.sleepPressureLevel).toBeLessThanOrEqual(1)
     }
   })
 })
