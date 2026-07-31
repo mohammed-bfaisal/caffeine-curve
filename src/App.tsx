@@ -7,6 +7,7 @@ import { EmptyState } from './components/EmptyState'
 import { Header } from './components/Header'
 import { SafeBedtimeCard } from './components/SafeBedtimeCard'
 import { SettingsPanel } from './components/SettingsPanel'
+import { SleepImpactCard } from './components/SleepImpactCard'
 import { buildCurveWindow } from './lib/curveWindow'
 import { useAppStore } from './store/useAppStore'
 
@@ -34,6 +35,7 @@ function App() {
         <CaffeineChart data={curveData} nowMs={nowMs} />
 
         <SafeBedtimeCard />
+        <SleepImpactCard />
 
         {doses.length === 0 ? (
           <EmptyState onLogDrink={() => setDrinkPickerOpen(true)} />
