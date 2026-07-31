@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { concentrationAt, peakConcentration } from '../pkModel'
-import { lastSafeIntakeTime, minutesToResidualFraction } from '../safeBedtime'
+import { lastSafeIntakeTime, minutesToResidualFraction, safeBedtimeRange } from '../safeBedtime'
 
 const PROFILE = { halfLifeHours: 5, weightKg: 70 }
 
@@ -40,5 +40,36 @@ describe('lastSafeIntakeTime', () => {
     const fast = lastSafeIntakeTime(100, { halfLifeHours: 3, weightKg: 70 }, bedtimeMs, 0.2)
     const slow = lastSafeIntakeTime(100, { halfLifeHours: 7.5, weightKg: 70 }, bedtimeMs, 0.2)
     expect(fast).toBeGreaterThan(slow)
+  })
+})
+
+describe('safeBedtimeRange', () => {
+  it('orders percentiles ascending (p10 earliest/safest, p90 latest/riskiest)', () => {
+    const bedtimeMs = Date.now()
+    const range = safeBedtimeRange(100, 70, bedtimeMs, 0.2)
+    expect(range.p10).toBeLessThanOrEqual(range.p50)
+    expect(range.p50).toBeLessThanOrEqual(range.p90)
+  })
+
+  it('is deterministic for identical inputs', () => {
+    const bedtimeMs = Date.now()
+    const a = safeBedtimeRange(100, 70, bedtimeMs, 0.2)
+    const b = safeBedtimeRange(100, 70, bedtimeMs, 0.2)
+    expect(a).toEqual(b)
+  })
+
+  it('brackets the single-half-life estimate for a mid-range half-life', () => {
+    const bedtimeMs = Date.now()
+    const range = safeBedtimeRange(100, 70, bedtimeMs, 0.2)
+    const midEstimate = lastSafeIntakeTime(100, { halfLifeHours: 5.5, weightKg: 70 }, bedtimeMs, 0.2)
+    expect(midEstimate).toBeGreaterThanOrEqual(range.p10)
+    expect(midEstimate).toBeLessThanOrEqual(range.p90)
+  })
+
+  it('varies with different inputs', () => {
+    const bedtimeMs = Date.now()
+    const a = safeBedtimeRange(100, 70, bedtimeMs, 0.2)
+    const b = safeBedtimeRange(200, 70, bedtimeMs, 0.2)
+    expect(a).not.toEqual(b)
   })
 })

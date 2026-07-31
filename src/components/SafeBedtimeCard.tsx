@@ -1,16 +1,9 @@
 import { format } from 'date-fns'
 import { useMemo, useState } from 'react'
 import { DRINK_PRESETS } from '../lib/drinkPresets'
-import { lastSafeIntakeTime } from '../lib/safeBedtime'
+import { lastSafeIntakeTime, safeBedtimeRange } from '../lib/safeBedtime'
+import { nextOccurrenceOfHour } from '../lib/timeOfDay'
 import { useAppStore } from '../store/useAppStore'
-
-function nextBedtimeMs(bedtimeHour: number, nowMs: number): number {
-  const now = new Date(nowMs)
-  const bedtime = new Date(now)
-  bedtime.setHours(Math.floor(bedtimeHour), Math.round((bedtimeHour % 1) * 60), 0, 0)
-  if (bedtime.getTime() <= nowMs) bedtime.setDate(bedtime.getDate() + 1)
-  return bedtime.getTime()
-}
 
 export function SafeBedtimeCard() {
   const profile = useAppStore((state) => state.profile)
@@ -18,15 +11,21 @@ export function SafeBedtimeCard() {
 
   const preset = DRINK_PRESETS.find((p) => p.id === presetId) ?? DRINK_PRESETS[0]
 
-  const lastSafeTime = useMemo(() => {
-    const bedtimeMs = nextBedtimeMs(profile.bedtimeHour, Date.now())
+  const { lastSafeTime, range } = useMemo(() => {
+    const bedtimeMs = nextOccurrenceOfHour(profile.bedtimeHour)
     const intakeMs = lastSafeIntakeTime(
       preset.defaultMg,
       { halfLifeHours: profile.halfLifeHours, weightKg: profile.weightKg },
       bedtimeMs,
       profile.residualThreshold,
     )
-    return intakeMs
+    const populationRange = safeBedtimeRange(
+      preset.defaultMg,
+      profile.weightKg,
+      bedtimeMs,
+      profile.residualThreshold,
+    )
+    return { lastSafeTime: intakeMs, range: populationRange }
   }, [preset.defaultMg, profile.bedtimeHour, profile.halfLifeHours, profile.weightKg, profile.residualThreshold])
 
   const isInPast = lastSafeTime < Date.now()
@@ -57,8 +56,14 @@ export function SafeBedtimeCard() {
         <p className="text-2xl font-semibold text-espresso-50">
           {format(new Date(lastSafeTime), 'h:mm a')}
         </p>
+        <p className="text-xs text-espresso-500">
+          based on your half-life setting; typical range{' '}
+          {format(new Date(range.p10), 'h:mm a')}-{format(new Date(range.p90), 'h:mm a')}
+        </p>
         {isInPast && (
-          <p className="text-xs text-amber-400">already past — decay to threshold takes longer than remaining time</p>
+          <p className="text-xs text-amber-400">
+            already past, decay to threshold takes longer than remaining time
+          </p>
         )}
       </div>
     </div>
