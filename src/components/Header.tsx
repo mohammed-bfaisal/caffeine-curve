@@ -1,3 +1,5 @@
+import { Logo } from './Logo'
+
 interface HeaderProps {
   onOpenSettings: () => void
   onLogDrink: () => void
@@ -7,7 +9,7 @@ export function Header({ onOpenSettings, onLogDrink }: HeaderProps) {
   return (
     <header className="flex items-center justify-between gap-4 px-4 py-5 sm:px-8">
       <div className="flex items-center gap-2">
-        <span className="text-2xl">☕</span>
+        <Logo className="h-8 w-8 shrink-0" />
         <div>
           <h1 className="text-lg font-semibold text-espresso-50 sm:text-xl">
             Caffeine Curve

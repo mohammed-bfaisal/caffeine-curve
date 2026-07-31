@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Logo } from './Logo'
 
 interface EmptyStateProps {
   onLogDrink: () => void
@@ -12,7 +13,7 @@ export function EmptyState({ onLogDrink }: EmptyStateProps) {
       transition={{ duration: 0.5 }}
       className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-espresso-700 bg-espresso-900/40 px-6 py-12 text-center"
     >
-      <span className="text-4xl">☕</span>
+      <Logo className="h-12 w-12" />
       <div>
         <h2 className="text-lg font-semibold text-espresso-50">No drinks logged yet</h2>
         <p className="mx-auto mt-1 max-w-sm text-sm text-espresso-400">
