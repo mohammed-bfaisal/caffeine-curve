@@ -12,7 +12,9 @@ export function Header({ onOpenSettings, onLogDrink }: HeaderProps) {
           <h1 className="text-lg font-semibold text-espresso-50 sm:text-xl">
             Caffeine Curve
           </h1>
-          <p className="text-xs text-espresso-500">A personal caffeine &amp; sleep tracker</p>
+          <p className="truncate text-xs text-espresso-500">
+            A personal caffeine &amp; sleep tracker
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">

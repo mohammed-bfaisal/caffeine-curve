@@ -42,7 +42,7 @@ export function SafeBedtimeCard() {
           <select
             value={presetId}
             onChange={(e) => setPresetId(e.target.value)}
-            className="rounded border border-espresso-700 bg-espresso-950 px-1.5 py-0.5 text-espresso-100"
+            className="max-w-[9rem] rounded border border-espresso-700 bg-espresso-950 px-1.5 py-0.5 text-espresso-100 sm:max-w-none"
           >
             {DRINK_PRESETS.map((option) => (
               <option key={option.id} value={option.id}>
