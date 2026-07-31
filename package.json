@@ -1,5 +1,6 @@
 {
   "name": "caffeine-curve",
+  "description": "A personal caffeine pharmacokinetics tracker with an illustrative sleep-pressure overlay.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
