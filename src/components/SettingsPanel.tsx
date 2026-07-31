@@ -5,6 +5,7 @@ import {
   METABOLIZER_PRESETS,
 } from '../lib/pkModel'
 import { useAppStore } from '../store/useAppStore'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 
 interface SettingsPanelProps {
   open: boolean
@@ -25,6 +26,8 @@ function timeInputToHour(value: string): number {
 export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const profile = useAppStore((state) => state.profile)
   const updateProfile = useAppStore((state) => state.updateProfile)
+
+  useEscapeKey(open, onClose)
 
   return (
     <AnimatePresence>

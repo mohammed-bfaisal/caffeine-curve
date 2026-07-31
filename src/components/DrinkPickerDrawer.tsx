@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import { DRINK_PRESETS, getDrinkPreset } from '../lib/drinkPresets'
 import { useAppStore } from '../store/useAppStore'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 
 interface DrinkPickerDrawerProps {
   open: boolean
@@ -19,6 +20,8 @@ export function DrinkPickerDrawer({ open, onClose }: DrinkPickerDrawerProps) {
   const [useManualMg, setUseManualMg] = useState(false)
   const [manualMg, setManualMg] = useState('100')
   const [timeValue, setTimeValue] = useState(() => toLocalDateTimeInputValue(new Date()))
+
+  useEscapeKey(open, onClose)
 
   const preset = getDrinkPreset(presetId)
 
